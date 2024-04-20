@@ -86,9 +86,9 @@ func Login(c *fiber.Ctx) error {
 	// создаем JWT-токен
 	// сперва создадим заявку (claims)
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		Issuer:    strconv.Itoa(int(user.Id)),                                  //  определяет приложение, из которого отправляется токен
-		ExpiresAt: jwt.NewTime(float64(time.Now().Add(time.Hour * 24).Unix())), // когда истекает (1 день = 86400 сенкунд)
-		//Subject:   "Auth",                                                      // определяет тему токена.
+		Issuer:    strconv.Itoa(int(user.Id)),                                  // определяет приложение, из которого отправляется токен. В нашем случа будем хранить здесь ID пользователя
+		ExpiresAt: jwt.NewTime(float64(time.Now().Add(time.Hour * 24).Unix())), // когда истекает (1 день)
+		//Subject:   "Auth",                                                    // определяет тему токена. Пока не используется, сокращаем размер токена
 	})
 
 	// создаем токен на основе заявки
@@ -160,7 +160,7 @@ func User(c *fiber.Ctx) error {
 	// получаем приложение (Issuer) из claims (заявки). Фактически это ID пользователя
 	// user_id := claims.Issuer
 
-	//получаем пользователя из БД по его ID
+	//получаем пользователя из БД по его ID (claims.Issuer)
 	var user models.User
 	database.DB.Where("id = ?", claims.Issuer).First(&user)
 
@@ -173,7 +173,8 @@ func Logout(c *fiber.Ctx) error {
 	//cookie := c.Cookies("jwt")
 
 	// Нам необхожимо удалить куки аутентифицированного пользователя.
-	// Для этого создаем другие куки, но с пустым токеном и датой истечения где-то в прошлом:
+	// Будем использовать небольшой трюк:
+	// создаем другие куки, но с пустым токеном и датой истечения где-то в прошлом:
 	cookie := fiber.Cookie{
 		Name:     "jwt",
 		Value:    "", //token,
