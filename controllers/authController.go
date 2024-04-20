@@ -131,13 +131,20 @@ type Claims struct {
 
 // User - возвращает аутентифицированного пользователя
 func User(c *fiber.Ctx) error {
-	// спрева получаем куки
+	// сперва получаем куки
 	cookie := c.Cookies("jwt") // берем куки по ключу "jwt"
 
 	//получаем токен из кук (проделываем операцию, обратную созданию токена)
 	token, err := jwt.ParseWithClaims(cookie, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte("secret"), nil
 	})
+
+	// добавил это, поскльку если произошел логаут - сервер слетал, из-за того, что токен пуст
+	if token == nil {
+		return c.JSON(fiber.Map{
+			"message": "token is null",
+		})
+	}
 
 	if err != nil && !token.Valid {
 		c.Status(fiber.StatusUnauthorized) //401
