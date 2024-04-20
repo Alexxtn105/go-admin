@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"go-admin/routes"
 )
 
@@ -16,6 +17,13 @@ func main() {
 
 	// Инициализируем новое приложение Fiber
 	app := fiber.New()
+
+	// настраиваем CORS (в middleware, для кореектной работы фроненда)
+	// ВНИМАНИЕ! Это крайне важно, потому что иначе фроненд не получит куки
+	app.Use(cors.New(cors.Config{
+		AllowCredentials: true,
+		AllowOrigins:     "http://127.0.0.1", // явно указываем, с какого сайта можно сделать запрос
+	}))
 
 	// настраиваем маршруты
 	routes.Setup(app)
