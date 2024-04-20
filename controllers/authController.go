@@ -39,6 +39,8 @@ func Register(c *fiber.Ctx) error {
 		Password:  password,
 	}
 
+	// TODO: проверить, есть ли пользователь с указанным email в базе!!!
+
 	//добавляем пользователя в базу
 	database.DB.Create(&user)
 
