@@ -10,7 +10,8 @@ import (
 )
 
 func Setup(app *fiber.App) {
-	// Define a route for the GET method on the root path '/'
+	// Определение маршрутов
 	app.Post("/api/register", controllers.Register)
+	app.Post("/api/login", controllers.Login)
 
 }
