@@ -1,10 +1,13 @@
 package controllers
 
 import (
+	"github.com/dgrijalva/jwt-go/v4"
 	"github.com/gofiber/fiber/v2"
 	"go-admin/database"
 	"go-admin/models"
 	"golang.org/x/crypto/bcrypt"
+	"strconv"
+	"time"
 )
 
 // Register - регистрация нового пользователя
@@ -43,7 +46,7 @@ func Register(c *fiber.Ctx) error {
 	return c.JSON(user)
 }
 
-// Login - логин пользователя
+// Login - логин пользователя, возвращает токен в случае успеха
 func Login(c *fiber.Ctx) error {
 	//парсим данные из запроса
 	//создаем мапу
@@ -67,7 +70,7 @@ func Login(c *fiber.Ctx) error {
 
 	//сравниваем хеш пароля из базы с тем, что пришел в запросе
 	if err := bcrypt.CompareHashAndPassword(user.Password, []byte(data["password"])); err != nil {
-		// устанавливаем статус 400
+		// устанавливаем статус
 		c.Status(400)
 		// и отправляем сообщение
 		return c.JSON(fiber.Map{
@@ -80,6 +83,27 @@ func Login(c *fiber.Ctx) error {
 	// Нужно выводить информацию о том, что пользователь или пароль неправильные.
 	// Пока оставим как есть
 
-	// Возвращаем структуру user в виде JSON
-	return c.JSON(user)
+	// создаем JWT-токен
+	// сперва создадим "клеймо"
+	//var tme int64
+	//tme = time.Now().Add(time.Hour * 24).Unix()
+
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
+		Issuer:    strconv.Itoa(int(user.Id)),                                  // кому принадлежит (ИД пользователя)
+		ExpiresAt: jwt.NewTime(float64(time.Now().Add(time.Hour * 24).Unix())), // когда истекает (1 день = 86400 сенкунд)
+		//ExpiresAt: jwt.NewTime(86400),         // когда истекает (1 день = 86400 сенкунд)
+	})
+	// создаем токен на основе "клейма"
+	// TODO: СЕКРЕТНЫЙ КЛЮЧ ВМЕСТО secret!!!
+	token, err := claims.SignedString([]byte("secret"))
+
+	// если ошибка
+	if err != nil {
+		// устанавливаем статус
+		return c.SendStatus(fiber.StatusInternalServerError) //fiber.StatusInternalServerError = 500
+
+	}
+
+	// Возвращаем структуру token, но не данные пользователя
+	return c.JSON(token)
 }
