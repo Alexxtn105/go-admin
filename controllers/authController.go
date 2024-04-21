@@ -6,7 +6,6 @@ import (
 	"go-admin/database"
 	"go-admin/models"
 	"go-admin/utils"
-	"golang.org/x/crypto/bcrypt"
 	"strconv"
 	"time"
 )
@@ -29,16 +28,20 @@ func Register(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"message": "passwords do not match"})
 	}
 
-	// хешируем пароль (
-	password, _ := bcrypt.GenerateFromPassword([]byte(data["password"]), 14)
+	// хешируем пароль
+	// старый вариант:
+	//password, _ := bcrypt.GenerateFromPassword([]byte(data["password"]), 14)
 
 	// создаем структуру пользователя данными из принятого JSON
 	user := models.User{
 		FirstName: data["first_name"],
 		LastName:  data["last_name"],
 		Email:     data["email"],
-		Password:  password,
+		//Password:  password,    //см. ниже
 	}
+
+	// с использованеим метода из модели ползователя:
+	user.SetPassword(data["password"])
 
 	// TODO: проверить, есть ли пользователь с указанным email в базе!!!
 
@@ -72,7 +75,8 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	//сравниваем хеш пароля из базы с тем, что пришел в запросе
-	if err := bcrypt.CompareHashAndPassword(user.Password, []byte(data["password"])); err != nil {
+	//	if err := bcrypt.CompareHashAndPassword(user.Password, []byte(data["password"])); err != nil {
+	if err := user.ComparePassword(data["password"]); err != nil {
 		// устанавливаем статус
 		c.Status(400)
 		// и отправляем сообщение
