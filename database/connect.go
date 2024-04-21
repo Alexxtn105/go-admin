@@ -23,5 +23,5 @@ func Connect() {
 	DB = database
 
 	// запускаем автоматическую миграцию для создания таблицы пользователей
-	database.AutoMigrate(&models.User{})
+	database.AutoMigrate(&models.User{}, &models.Role{})
 }
