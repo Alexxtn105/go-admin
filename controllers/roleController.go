@@ -7,6 +7,13 @@ import (
 	"strconv"
 )
 
+// RoleCreateDTO - структура для создания роли (DTO - Data Transfer Object)
+type RoleCreateDTO struct {
+	name        string
+	permissions []string // id разрешений
+
+}
+
 // AllRoles - возвращает ВСЕХ пользователей
 // Например: GET http://localhost:3000/api/roles
 func AllRoles(c *fiber.Ctx) error {
@@ -15,6 +22,7 @@ func AllRoles(c *fiber.Ctx) error {
 	return c.JSON(roles)     // возвращаем JSON с данными
 }
 
+/*
 // CreateRole - создание роли в БД.
 // Например: POST http://localhost:3000/api/roles
 func CreateRole(c *fiber.Ctx) error {
@@ -23,6 +31,49 @@ func CreateRole(c *fiber.Ctx) error {
 	// парсим данные. Если данные не подходят - выходим с ошибкой
 	if err := c.BodyParser(&role); err != nil {
 		return err
+	}
+
+	// создаем запсиь в БД
+	database.DB.Create(&role)
+
+	return c.JSON(role)
+}
+*/
+
+// CreateRole - создание роли в БД. Вариант с таблицей разрешений
+// Например: POST http://localhost:3000/api/roles
+func CreateRole(c *fiber.Ctx) error {
+	//var roleDTO RoleCreateDTO
+	// Как показано выше не работает!!! нужно использовать fiber.Map
+	//перепишем так:
+	var roleDTO fiber.Map
+
+	// парсим данные. Если данные не подходят - выходим с ошибкой
+	if err := c.BodyParser(&roleDTO); err != nil {
+		return err
+	}
+	// создаем список пустых интерфейсов
+	list := roleDTO["permissions"].([]interface{})
+
+	// необходимо преобразовать разрешения из строк в id
+	//создаем слайс разрешений нужной длины
+	//	permissions := make([]models.Permission, len(roleDTO.permissions))
+	permissions := make([]models.Permission, len(list)) //так должно работать
+
+	// бежим по полученным в запросе разрешениям
+	//	for i, permissionId := range roleDTO.permissions {
+	for i, permissionId := range list {
+		//id, _ := strconv.Atoi(permissionId)
+		id, _ := strconv.Atoi(permissionId.(string))
+		permissions[i] = models.Permission{
+			Id: uint(id),
+		}
+	}
+
+	role := models.Role{
+		//		Name:        roleDTO.name,
+		Name:        roleDTO["name"].(string),
+		Permissions: permissions, //пихаем сюда разрешения, полученные в цикле
 	}
 
 	// создаем запсиь в БД
