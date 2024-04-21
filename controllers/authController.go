@@ -5,6 +5,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"go-admin/database"
 	"go-admin/models"
+	"go-admin/utils"
 	"golang.org/x/crypto/bcrypt"
 	"strconv"
 	"time"
@@ -13,7 +14,7 @@ import (
 // Register - регистрация нового пользователя
 func Register(c *fiber.Ctx) error {
 	//парсим данные из запроса
-	//создаем мапу
+	//создаем мапу для данных запроса
 	var data map[string]string
 
 	if err := c.BodyParser(&data); err != nil {
@@ -85,24 +86,13 @@ func Login(c *fiber.Ctx) error {
 	// Не нужно конкретизировать, что именно неправильно ввел пользователь, почту или пароль.
 	// Пока оставим как есть
 
-	// создаем JWT-токен
-	// сперва создадим заявку (claims)
-	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		Issuer:    strconv.Itoa(int(user.Id)),                                  // определяет приложение, из которого отправляется токен. В нашем случа будем хранить здесь ID пользователя
-		ExpiresAt: jwt.NewTime(float64(time.Now().Add(time.Hour * 24).Unix())), // когда истекает (1 день)
-		//Subject:   "Auth",                                                    // определяет тему токена. Пока не используется, сокращаем размер токена
-	})
-
-	// создаем токен на основе заявки
-	// TODO: ДОБАВИТЬ СЕКРЕТНЫЙ КЛЮЧ ВМЕСТО secret!!!
-	token, err := claims.SignedString([]byte("secret"))
+	// генерацию тоекна вынес в middleware (utils.GenerateJwt)
+	token, err := utils.GenerateJwt(strconv.Itoa(int(user.Id)))
 
 	// если ошибка
 	if err != nil {
 		// устанавливаем статус
-
-		return c.SendStatus(fiber.StatusInternalServerError) //fiber.StatusInternalServerError = 500
-
+		return c.SendStatus(fiber.StatusInternalServerError) // 500
 	}
 
 	//сохраняем токен в куки
@@ -136,35 +126,12 @@ func User(c *fiber.Ctx) error {
 	// сперва получаем куки
 	cookie := c.Cookies("jwt") // берем куки по ключу "jwt"
 
-	//получаем токен из кук (проделываем операцию, обратную созданию токена)
-	token, err := jwt.ParseWithClaims(cookie, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte("secret"), nil
-	})
-
-	// добавил это, поскльку если произошел логаут - сервер слетал, из-за того, что токен пуст
-	if token == nil {
-		return c.JSON(fiber.Map{
-			"message": "token is null",
-		})
-	}
-
-	if err != nil && !token.Valid {
-		c.Status(fiber.StatusUnauthorized) //401
-		return c.JSON(fiber.Map{
-			"message": "unauthenticated",
-		})
-	}
-
-	// получаем Claims (заявку)
-	claims := token.Claims.(*Claims) //здесь осужествляем преобразование завки в наш внутренний тип *Claims,
-	// чтобы в дальнейшем можно было получить приложение (claims.Issuer)
-
-	// получаем приложение (Issuer) из claims (заявки). Фактически это ID пользователя
-	// user_id := claims.Issuer
+	// вынес парсинг jwt в middleware (utils)
+	userId, _ := utils.ParseJwt(cookie)
 
 	//получаем пользователя из БД по его ID (claims.Issuer)
 	var user models.User
-	database.DB.Where("id = ?", claims.Issuer).First(&user)
+	database.DB.Where("id = ?", userId).First(&user)
 
 	//возвращаем пользователя
 	return c.JSON(user)
