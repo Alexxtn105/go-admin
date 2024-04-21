@@ -10,9 +10,16 @@ import (
 // AllUsers - возвращает ВСЕХ пользователей
 // Например: GET http://localhost:3000/api/users
 func AllUsers(c *fiber.Ctx) error {
-	var users []models.User  // создаем слайс с пользователями
-	database.DB.Find(&users) // поиск всех пользователей в БД
-	return c.JSON(users)     // возвращаем JSON с данными
+	var users []models.User // создаем слайс с пользователями
+
+	//database.DB.Find(&users) // поиск всех пользователей в БД
+
+	//Вариант для ролей:
+	//делаем предзагрузку таблицы ролей по foreignKey,
+	//чтобы корректно отображать данные пользователей и их ролей
+	database.DB.Preload("Role").Find(&users)
+
+	return c.JSON(users) // возвращаем JSON с данными
 }
 
 // CreateUser - создание пользователя в БД. Не путать с регистрацией пользователя controllers.Register!!!
@@ -46,7 +53,7 @@ func GetUser(c *fiber.Ctx) error {
 	}
 
 	// ищем пользователя в базе
-	database.DB.Find(&user)
+	database.DB.Preload("Role").Find(&user)
 
 	//выводим данные о пользователе в виде JSON
 	return c.JSON(user)

@@ -3,11 +3,13 @@ package models
 import "golang.org/x/crypto/bcrypt"
 
 type User struct {
-	Id        uint   `json:"id"`                  // переопределяем имена полей в ответах сервера
-	FirstName string `json:"first_name"`          // переопределяем имена полей в ответах сервера
-	LastName  string `json:"last_name"`           // переопределяем имена полей в ответах сервера
-	Email     string `json:"email" gorm:"unique"` // имя, а также уникальный столбец  gorm (для миграции)
-	Password  []byte `json:"-"`                   // не показывать пароль в ответе сервера
+	Id        uint   `json:"id"`                             // переопределяем имена полей в ответах сервера
+	FirstName string `json:"first_name"`                     // переопределяем имена полей в ответах сервера
+	LastName  string `json:"last_name"`                      // переопределяем имена полей в ответах сервера
+	Email     string `json:"email" gorm:"unique"`            // имя, а также уникальный столбец  gorm (для миграции)
+	Password  []byte `json:"-"`                              // не показывать пароль в ответе сервера
+	RoleId    uint   `json:"role_id"`                        // роль пользователя
+	Role      Role   `json:"role" gorm:"foreignKey:RoleId""` // указываем горму внешний ключ
 }
 
 // SetPassword - установка пароля для пользователя
