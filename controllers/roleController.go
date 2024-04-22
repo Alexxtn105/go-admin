@@ -43,27 +43,22 @@ func CreateRole(c *fiber.Ctx) error {
 // CreateRole - создание роли в БД. Вариант с таблицей разрешений
 // Например: POST http://localhost:3000/api/roles
 func CreateRole(c *fiber.Ctx) error {
-	//var roleDTO RoleCreateDTO
-	// Как показано выше не работает!!! нужно использовать fiber.Map
-	//перепишем так:
+
 	var roleDTO fiber.Map
 
 	// парсим данные. Если данные не подходят - выходим с ошибкой
 	if err := c.BodyParser(&roleDTO); err != nil {
 		return err
 	}
-	// создаем список пустых интерфейсов
+	// создаем список любых интерфейсов, в нужные значения преобразуем потом
 	list := roleDTO["permissions"].([]interface{})
 
 	// необходимо преобразовать разрешения из строк в id
 	//создаем слайс разрешений нужной длины
-	//	permissions := make([]models.Permission, len(roleDTO.permissions))
 	permissions := make([]models.Permission, len(list)) //так должно работать
 
 	// бежим по полученным в запросе разрешениям
-	//	for i, permissionId := range roleDTO.permissions {
 	for i, permissionId := range list {
-		//id, _ := strconv.Atoi(permissionId)
 		id, _ := strconv.Atoi(permissionId.(string))
 		permissions[i] = models.Permission{
 			Id: uint(id),
@@ -71,12 +66,11 @@ func CreateRole(c *fiber.Ctx) error {
 	}
 
 	role := models.Role{
-		//		Name:        roleDTO.name,
 		Name:        roleDTO["name"].(string),
 		Permissions: permissions, //пихаем сюда разрешения, полученные в цикле
 	}
 
-	// создаем запсиь в БД
+	// создаем запись в БД
 	database.DB.Create(&role)
 
 	return c.JSON(role)
@@ -107,13 +101,42 @@ func UpdateRole(c *fiber.Ctx) error {
 	id, _ := strconv.Atoi(c.Params("id"))
 
 	//создаем новую структуру с заполненным Id, по которому ниже найдем запись в базе
-	role := models.Role{
-		Id: uint(id),
-	}
+	/*	role := models.Role{
+			Id: uint(id),
+		}
+	*/
+
+	var roleDTO fiber.Map
 
 	// парсим данные, которые ввел пользователь. Если данные не подходят - выходим с ошибкой
-	if err := c.BodyParser(&role); err != nil {
+	if err := c.BodyParser(&roleDTO); err != nil {
 		return err
+	}
+
+	// создаем список любых интерфейсов, в нужные значения преобразуем потом
+	list := roleDTO["permissions"].([]interface{})
+
+	// необходимо преобразовать разрешения из строк в id
+	//создаем слайс разрешений нужной длины
+	permissions := make([]models.Permission, len(list)) //так должно работать
+
+	// бежим по полученным в запросе разрешениям
+	for i, permissionId := range list {
+		id, _ := strconv.Atoi(permissionId.(string))
+		permissions[i] = models.Permission{
+			Id: uint(id),
+		}
+	}
+
+	// сперва удалим старые разрешения
+	var result interface{}
+	database.DB.Table("role_permissions").Where("role_id = ?", id).Delete(result)
+
+	// создаем роль
+	role := models.Role{
+		Id:          uint(id),
+		Name:        roleDTO["name"].(string),
+		Permissions: permissions, //пихаем сюда разрешения, полученные в цикле
 	}
 
 	// обновляем данные в базе
