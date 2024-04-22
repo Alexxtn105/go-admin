@@ -1,14 +1,12 @@
 package main
 
 import (
+	"go-admin/database"
+	"go-admin/routes"
+	"log"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"go-admin/routes"
-)
-
-import (
-	"go-admin/database"
-	"log"
 )
 
 func main() {
