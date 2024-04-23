@@ -4,7 +4,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"go-admin/database"
 	"go-admin/models"
-	"math"
 	"strconv"
 )
 
@@ -17,38 +16,51 @@ func AllUsers(c *fiber.Ctx) error {
 	// ПРИКРУТИМ страничный режим
 	// берем номер страницы из параметра URL "page", по умолчанию - "1"
 	page, _ := strconv.Atoi(c.Query("page", "1"))
-	//вводим ограничения для постраничного вывода, если их много
-	limit := 5
-	//начальная позиция на выбранной странице
-	offset := (page - 1) * limit
-	//общее количество
-	var total int64
-
-	var users []models.User // создаем слайс с данными
-
-	//database.DB.Find(&users) // поиск всех данных в БД
-
-	//Вариант для ролей:
-	//делаем предзагрузку таблицы ролей по foreignKey,
-	//чтобы корректно отображать данные ролей
-	//также вводим ограничение на количество (limit)
-	database.DB.Preload("Role").Offset(offset).Limit(limit).Find(&users)
-
-	// получаем количество записей
-	database.DB.Model(&models.User{}).Count(&total)
 
 	// Используем постраничный вывод.
 	// параметр номера страницы - в URL, например, для второй страницы:
 	// http://localhost:3000/api/users?page=2
-	return c.JSON(fiber.Map{
-		"data": users,
-		"meta": fiber.Map{
-			"page":      page,
-			"total":     total,
-			"last_page": math.Floor(float64(int(total)/limit)) + 1, //
-		}})
-
+	return c.JSON(models.Paginate(database.DB, &models.User{}, page))
 }
+
+//func AllUsers_OLD_VERSION(c *fiber.Ctx) error {
+//
+//	// ПРИКРУТИМ страничный режим
+//	// берем номер страницы из параметра URL "page", по умолчанию - "1"
+//	page, _ := strconv.Atoi(c.Query("page", "1"))
+//
+//	//вводим ограничения для постраничного вывода, если их много
+//	limit := 5
+//	//начальная позиция на выбранной странице
+//	offset := (page - 1) * limit
+//	//общее количество
+//	var total int64
+//
+//	var users []models.User // создаем слайс с данными
+//
+//	//database.DB.Find(&users) // поиск всех данных в БД
+//
+//	//Вариант для ролей:
+//	//делаем предзагрузку таблицы ролей по foreignKey,
+//	//чтобы корректно отображать данные ролей
+//	//также вводим ограничение на количество (limit)
+//	database.DB.Preload("Role").Offset(offset).Limit(limit).Find(&users)
+//
+//	// получаем количество записей
+//	database.DB.Model(&models.User{}).Count(&total)
+//
+//	// Используем постраничный вывод.
+//	// параметр номера страницы - в URL, например, для второй страницы:
+//	// http://localhost:3000/api/users?page=2
+//	return c.JSON(fiber.Map{
+//		"data": users,
+//		"meta": fiber.Map{
+//			"page":      page,
+//			"total":     total,
+//			"last_page": math.Floor(float64(int(total)/limit)) + 1, //
+//		}})
+//
+//}
 
 // CreateUser - создание пользователя в БД. Не путать с регистрацией пользователя controllers.Register!!!
 // Например: POST http://localhost:3000/api/users
