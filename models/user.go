@@ -36,6 +36,6 @@ func (u *User) Count(db *gorm.DB) int64 {
 // Take - возвращает слайс для постраничного вывода
 func (u *User) Take(db *gorm.DB, limit int, offset int) any {
 	var users []User
-	return db.Offset(offset).Limit(limit).Find(&users)
+	return db.Preload("role").Offset(offset).Limit(limit).Find(&users)
 	return users
 }

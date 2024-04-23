@@ -9,7 +9,7 @@ import (
 // Paginate - постраничный вывод данных
 func Paginate(db *gorm.DB, entity Entity, page int) fiber.Map {
 	//вводим ограничения для постраничного вывода пользователей, если их много
-	limit := 5
+	limit := 15
 	//начальная позиция на выбранной странице
 	offset := (page - 1) * limit
 
