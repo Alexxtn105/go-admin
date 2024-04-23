@@ -87,8 +87,8 @@ func GetRole(c *fiber.Ctx) error {
 		Id: uint(id),
 	}
 
-	// ищем роль в базе
-	database.DB.Find(&role)
+	// ищем роль в базе, предварительно загружаем таблицу разрешений ("permissions")
+	database.DB.Preload("Permissions").Find(&role)
 
 	//выводим данные в виде JSON
 	return c.JSON(role)
