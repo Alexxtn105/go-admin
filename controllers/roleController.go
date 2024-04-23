@@ -129,10 +129,10 @@ func UpdateRole(c *fiber.Ctx) error {
 	}
 
 	// сперва удалим старые разрешения
-	var result interface{}
-	database.DB.Table("role_permissions").Where("role_id = ?", id).Delete(result)
+	var result models.Role
+	database.DB.Table("role_permissions").Where("role_id = ?", id).Delete(&result)
 
-	// создаем роль
+	// теперь создаем роль с нужными разрешениями
 	role := models.Role{
 		Id:          uint(id),
 		Name:        roleDTO["name"].(string),
