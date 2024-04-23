@@ -17,6 +17,7 @@ func Setup(app *fiber.App) {
 	app.Post("/api/register", controllers.Register)
 	app.Post("/api/login", controllers.Login)
 
+	// ВСЕ МАРШРУТЫ НИЖЕ ТОЛЬКО ДЛЯ АУТЕНТИФИЦИРОВАННЫХ ПОЛЬЗОВАТЕЛЕЙ!
 	// маршруты для аутентифицированных пользователей
 	// поэтому будем использовать middleware - app.Use()
 	app.Use(middleware.IsAuthenticated)
@@ -56,4 +57,10 @@ func Setup(app *fiber.App) {
 	app.Get("/api/products/:id", controllers.GetProduct)
 	app.Put("/api/products/:id", controllers.UpdateProduct)
 	app.Delete("/api/products/:id", controllers.DeleteProduct)
+
+	// images
+	app.Post("/api/upload", controllers.Upload)
+	//для рабты со статическими файлами (например, картинками) делаем так:
+	app.Static("api/uploads", "./uploads")
+
 }
