@@ -20,7 +20,7 @@ func Register(c *fiber.Ctx) error {
 		return err
 	}
 
-	//проверяем, совпадают ли пароли
+	//проверяем, совпадают ли введенные пароли
 	if data["password"] != data["password_confirm"] {
 		// если пароли не совпадают, устанавливаем статус 400
 		c.Status(400)
@@ -162,4 +162,68 @@ func Logout(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"message": "logout success",
 	})
+}
+
+// UpdateInfo - обновление информации о текщем залогиненном пользователе
+func UpdateInfo(c *fiber.Ctx) error {
+	//парсим данные из запроса
+	//создаем мапу для данных запроса
+	var data map[string]string
+	if err := c.BodyParser(&data); err != nil {
+		return err
+	}
+
+	// получаем куки
+	cookie := c.Cookies("jwt") // берем куки по ключу "jwt"
+
+	// вынес парсинг jwt в middleware (utils)
+	id, _ := utils.ParseJwt(cookie)
+	userId, _ := strconv.Atoi(id)
+
+	//получаем пользователя из БД по его ID (claims.Issuer)
+	user := models.User{
+		Id:        uint(userId),
+		FirstName: data["first_name"],
+		LastName:  data["last_name"],
+		Email:     data["email"],
+	}
+	database.DB.Model(&user).Updates(user)
+
+	//возвращаем пользователя
+	return c.JSON(user)
+}
+
+// UpdatePassword - обновление пароля о текщего залогиненного пользователя
+func UpdatePassword(c *fiber.Ctx) error {
+	//парсим данные из запроса
+	//создаем мапу для данных запроса
+	var data map[string]string
+	if err := c.BodyParser(&data); err != nil {
+		return err
+	}
+
+	//проверяем, совпадают ли введенные НОВЫЕ пароли
+	if data["password"] != data["password_confirm"] {
+		// если пароли не совпадают, устанавливаем статус 400
+		c.Status(400)
+		//и выдаем сообщение клиенту (в виде JSON)
+		return c.JSON(fiber.Map{"message": "passwords do not match"})
+	}
+
+	// получаем куки
+	cookie := c.Cookies("jwt") // берем куки по ключу "jwt"
+
+	// вынес парсинг jwt в middleware (utils)
+	id, _ := utils.ParseJwt(cookie)
+	userId, _ := strconv.Atoi(id)
+
+	user := models.User{
+		Id: uint(userId),
+	}
+	user.SetPassword(data["password"])
+
+	database.DB.Model(&user).Updates(user)
+
+	//возвращаем пользователя
+	return c.JSON(user)
 }

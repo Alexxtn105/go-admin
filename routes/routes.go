@@ -21,6 +21,11 @@ func Setup(app *fiber.App) {
 	// поэтому будем использовать middleware - app.Use()
 	app.Use(middleware.IsAuthenticated)
 
+	//эти два маршрута должны быть выше CRUD (строка app.Get("/api/users", controllers.AllUsers) и ниже),
+	//поскольку может произойти коллизия со строками /api/users/:id
+	app.Put("/api/users/info", controllers.UpdateInfo)
+	app.Put("/api/users/password", controllers.UpdatePassword)
+
 	app.Get("/api/user", controllers.User)
 	app.Post("/api/logout", controllers.Logout)
 
