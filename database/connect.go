@@ -14,7 +14,7 @@ import (
 var DB *gorm.DB
 
 func Connect() {
-	
+
 	// подключаемся к БД (имя_пользователя:пароль@/адрес сервера (для localhost пусто)
 	database, err := gorm.Open(mysql.Open("root:Sulubun205!@/go-admin"), &gorm.Config{})
 	if err != nil {
@@ -23,6 +23,12 @@ func Connect() {
 	}
 	DB = database
 
-	// запускаем автоматическую миграцию для создания таблицы пользователей
-	database.AutoMigrate(&models.User{}, &models.Role{}, &models.Permission{}, &models.Product{})
+	// запускаем автоматическую миграцию для создания таблиц, а также их модификации
+	database.AutoMigrate(
+		&models.User{},
+		&models.Role{},
+		&models.Permission{},
+		&models.Product{},
+		&models.Order{},
+		&models.OrderItem{})
 }

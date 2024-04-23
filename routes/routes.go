@@ -60,7 +60,10 @@ func Setup(app *fiber.App) {
 
 	// images
 	app.Post("/api/upload", controllers.Upload)
-	//для рабты со статическими файлами (например, картинками) делаем так:
+	//для рабты с маршрутами к статическими файлами (например, картинками) делаем так:
 	app.Static("api/uploads", "./uploads")
+
+	// CRUD для заказов
+	app.Get("/api/orders", controllers.AllOrders)
 
 }
