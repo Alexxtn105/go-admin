@@ -65,5 +65,6 @@ func Setup(app *fiber.App) {
 
 	// CRUD для заказов
 	app.Get("/api/orders", controllers.AllOrders)
+	app.Post("/api/export", controllers.Export)
 
 }
