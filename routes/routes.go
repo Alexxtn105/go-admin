@@ -51,7 +51,7 @@ func Setup(app *fiber.App) {
 	app.Put("/api/permissions/:id", controllers.UpdatePermission)
 	app.Delete("/api/permissions/:id", controllers.DeletePermission)
 
-	// CRUD для пользователей
+	// CRUD для продуктов
 	app.Get("/api/products", controllers.AllProducts)
 	app.Post("/api/products", controllers.CreateProduct)
 	app.Get("/api/products/:id", controllers.GetProduct)
