@@ -2,7 +2,7 @@ package routes
 
 // Зависимости:
 // Fiber (web framework):
-// go get github.com/gofiber/fiber/v3
+// go get github.com/gofiber/fiber/v2
 
 import (
 	"github.com/gofiber/fiber/v2"
