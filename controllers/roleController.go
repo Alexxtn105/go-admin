@@ -59,7 +59,26 @@ func CreateRole(c *fiber.Ctx) error {
 
 	// бежим по полученным в запросе разрешениям
 	for i, permissionId := range list {
-		id, _ := strconv.Atoi(permissionId.(string))
+		var id int
+		switch permissionId.(type) {
+		case float64:
+			id = int(permissionId.(float64))
+		case string:
+			id, _ = strconv.Atoi(permissionId.(string))
+		case int:
+			id = permissionId.(int)
+		default:
+			id = int(permissionId.(float64))
+		}
+
+		// это работает
+		//id := int(permissionId.(float64))
+
+		//	id, err := strconv.Atoi(permissionId.(string))
+		//	if err != nil {
+
+		//panic(err)
+		//	}
 		permissions[i] = models.Permission{
 			Id: uint(id),
 		}
