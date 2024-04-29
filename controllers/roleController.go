@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/log"
 	"go-admin/database"
 	"go-admin/models"
 	"strconv"
@@ -170,8 +171,10 @@ func UpdateRole(c *fiber.Ctx) error {
 // например: DELETE http://localhost:3000/api/roles/2
 func DeleteRole(c *fiber.Ctx) error {
 	// берем параметр из URL
-	id, _ := strconv.Atoi(c.Params("id"))
-
+	id, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		log.Error("cannot get id to delete")
+	}
 	//создаем новую структуру пользователя с заполненным Id, по которому ниже найдем пользователя в базе
 	role := models.Role{
 		Id: uint(id),
