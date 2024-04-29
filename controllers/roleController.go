@@ -39,6 +39,22 @@ func CreateRole(c *fiber.Ctx) error {
 	return c.JSON(role)
 }
 */
+// getRoleID - получение роли по ее интерфейсу
+func getRoleID(permissionId interface{}) int {
+	var id int
+	switch permissionId.(type) {
+	case float64:
+		id = int(permissionId.(float64))
+	case string:
+		id, _ = strconv.Atoi(permissionId.(string))
+	case int:
+		id = permissionId.(int)
+	default:
+		id = int(permissionId.(float64))
+	}
+	return id
+
+}
 
 // CreateRole - создание роли в БД. Вариант с таблицей разрешений
 // Например: POST http://localhost:3000/api/roles
@@ -59,26 +75,9 @@ func CreateRole(c *fiber.Ctx) error {
 
 	// бежим по полученным в запросе разрешениям
 	for i, permissionId := range list {
-		var id int
-		switch permissionId.(type) {
-		case float64:
-			id = int(permissionId.(float64))
-		case string:
-			id, _ = strconv.Atoi(permissionId.(string))
-		case int:
-			id = permissionId.(int)
-		default:
-			id = int(permissionId.(float64))
-		}
+		// берем ид роли по его пермишшену типа interface{} (any)
+		id := getRoleID(permissionId)
 
-		// это работает
-		//id := int(permissionId.(float64))
-
-		//	id, err := strconv.Atoi(permissionId.(string))
-		//	if err != nil {
-
-		//panic(err)
-		//	}
 		permissions[i] = models.Permission{
 			Id: uint(id),
 		}
@@ -141,7 +140,9 @@ func UpdateRole(c *fiber.Ctx) error {
 
 	// бежим по полученным в запросе разрешениям
 	for i, permissionId := range list {
-		id, _ := strconv.Atoi(permissionId.(string))
+
+		id := getRoleID(permissionId)
+
 		permissions[i] = models.Permission{
 			Id: uint(id),
 		}
