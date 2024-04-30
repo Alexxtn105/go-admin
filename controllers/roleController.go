@@ -175,14 +175,19 @@ func DeleteRole(c *fiber.Ctx) error {
 	if err != nil {
 		log.Error("cannot get id to delete")
 	}
-	//создаем новую структуру пользователя с заполненным Id, по которому ниже найдем пользователя в базе
+	//создаем новую структуру с заполненным Id, по которому ниже найдем пользователя в базе
 	role := models.Role{
 		Id: uint(id),
 	}
 
-	// удаляем пользователя из базы
+	// сперва удалим старые разрешения
+	var result models.Role
+	database.DB.Table("role_permissions").Where("role_id = ?", id).Delete(&result)
+
+	// удаляем роль из базы
 	database.DB.Delete(&role)
 
 	// возвращаем json  с измененными данными
-	return nil
+	//return nil
+	return c.JSON(fiber.Map{"message": "role deleted"})
 }
