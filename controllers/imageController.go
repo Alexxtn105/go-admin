@@ -16,10 +16,10 @@ func Upload(c *fiber.Ctx) error {
 	// файлов в форме может быть несколько
 	files := form.File["image"]
 	filename := ""
-	//бежим по всем фалам, помещаем их в нужную папку
+	//бежим по всем файлам, помещаем их в нужную папку
 	//ПАПКА ДОЛЖНА СУЩЕСТВОВАТЬ!!!
 	for _, file := range files {
-		// сохранячем файл
+		// сохраняем файл
 		filename = file.Filename
 
 		if err := c.SaveFile(file, "./uploads/"+filename); err != nil {
