@@ -94,7 +94,8 @@ func Chart(c *fiber.Ctx) error {
 
 	database.DB.Raw(`
 	SELECT
-		DATE_FORMAT( o.created_at, '%Y-%m-%d') as date,
+		--DATE_FORMAT( o.created_at, '%Y-%m-%d') as date,
+		o.created_at as date,
 		SUM(oi.price*oi.quantity) AS sum
 	FROM orders o
 	JOIN order_items oi ON o.id = oi.order_id

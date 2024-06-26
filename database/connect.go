@@ -6,7 +6,11 @@ package database
 
 import (
 	"go-admin/models"
-	"gorm.io/driver/mysql"
+
+	//"gorm.io/driver/mysql"
+	"gorm.io/driver/sqlite" // Sqlite driver based on CGO
+	// "github.com/glebarez/sqlite" // Pure go SQLite driver, checkout https://github.com/glebarez/sqlite for details
+
 	"gorm.io/gorm"
 )
 
@@ -16,7 +20,10 @@ var DB *gorm.DB
 func Connect() {
 
 	// подключаемся к БД (имя_пользователя:пароль@/адрес сервера (для localhost пусто)
-	database, err := gorm.Open(mysql.Open("root:Sulubun205!@/go-admin"), &gorm.Config{})
+	//database, err := gorm.Open(mysql.Open("root:Sulubun205!@/go-admin"), &gorm.Config{})
+
+	database, err := gorm.Open(sqlite.Open("storage/database.db"), &gorm.Config{})
+
 	if err != nil {
 
 		panic("Could not connect to the database")
