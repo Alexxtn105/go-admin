@@ -33,7 +33,7 @@ func IsAuthorized(c *fiber.Ctx, page string) error {
 	}
 	database.DB.Preload("Permissions").Find(&role)
 
-	// найдем разрешения для роли, имеется ли доступ к странице
+	// найдем разрешения для роли, имеется ли доступ к странице (имена ролей: view_users, edit_users и тп.)
 	if c.Method() == "GET" {
 		for _, permission := range role.Permissions {
 			if permission.Name == "view_"+page || permission.Name == "view_"+page {
