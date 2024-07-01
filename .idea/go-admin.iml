@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="JAVA_MODULE" version="4">
-  <component name="Go" enabled="true" />
+  <component name="Go" enabled="true">
+    <buildTags>
+      <option name="cgo" value="YES" />
+    </buildTags>
+  </component>
   <component name="GoLibraries">
     <option name="urls">
       <list>
