@@ -20,7 +20,8 @@ func main() {
 	// ВНИМАНИЕ! Это крайне важно, потому что иначе фронтенд не получит куки
 	app.Use(cors.New(cors.Config{
 		AllowCredentials: true,
-		AllowOrigins:     "http://127.0.0.1:8080, http://localhost:8080", // явно указываем, с какого сайта можно сделать запрос
+		AllowOrigins:     "http://127.0.0.1:8080, http://localhost:8080, http://localhost:3000", // явно указываем, с какого сайта можно сделать запрос
+		//AllowOrigins: "http://localhost:8080", // явно указываем, с какого сайта можно сделать запрос
 	}))
 
 	// настраиваем маршруты

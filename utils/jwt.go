@@ -2,6 +2,7 @@ package utils
 
 import (
 	"github.com/dgrijalva/jwt-go/v4"
+	"github.com/gofiber/fiber/v2/log"
 	"time"
 )
 
@@ -26,11 +27,14 @@ func GenerateJwt(issuer string) (string, error) {
 // ParseJwt - возвращает ID пользователя по его кукам
 func ParseJwt(cookie string) (string, error) {
 	//получаем токен из кук (проделываем операцию, обратную созданию токена)
+	log.Info("Пытаемся получить токен из кук: ", cookie)
 	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(secretKey), nil
 	})
 
 	if err != nil || !token.Valid {
+		log.Error(err)
+		log.Error("Необходимо проверить CORS!!!")
 		return "", err
 	}
 

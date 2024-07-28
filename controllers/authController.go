@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/dgrijalva/jwt-go/v4"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/log"
 	"go-admin/database"
 	"go-admin/models"
 	"go-admin/utils"
@@ -57,16 +58,20 @@ func Register(c *fiber.Ctx) error {
 func Login(c *fiber.Ctx) error {
 	//парсим данные из запроса
 	//создаем мапу
+	log.Info("Trying to login")
 	var data map[string]string
 
 	if err := c.BodyParser(&data); err != nil {
+
+		log.Errorf("%s", err)
+
 		return err
 	}
 
 	// ищем в базе данные о пользователе по его email
 	var user models.User
 	database.DB.Where("email = ?", data["email"]).First(&user)
-
+	log.Info("user finded. ID: ", user.Id)
 	// если пользователь не найден, значит выводим ошибку 404 и сообщение
 	if user.Id == 0 {
 		c.Status(404)
@@ -80,6 +85,8 @@ func Login(c *fiber.Ctx) error {
 	if err := user.ComparePassword(data["password"]); err != nil {
 		// устанавливаем статус
 		c.Status(400)
+		log.Info("incorrect password")
+
 		// и отправляем сообщение
 		return c.JSON(fiber.Map{
 			"message": "incorrect password",
@@ -97,6 +104,8 @@ func Login(c *fiber.Ctx) error {
 	// если ошибка
 	if err != nil {
 		// устанавливаем статус
+		log.Info("Internal Server Error (500)")
+
 		return c.SendStatus(fiber.StatusInternalServerError) // 500
 	}
 
@@ -107,10 +116,12 @@ func Login(c *fiber.Ctx) error {
 		Expires:  time.Now().Add(time.Hour * 24),
 		HTTPOnly: true, // это необходимо для того, чтобы фронтенд имел доступ к кукам
 	}
-
+	log.Info("Сохраняем куки, длина: ", len(cookie.Value))
 	// Пихаем куки в контекст.
 	// ВНИМАНИЕ! Необходимо настроить CORS в функции main с параметром allowCredentials: true. См.  строку  app.Use(cors.New(...))
 	c.Cookie(&cookie)
+
+	log.Info("Success")
 
 	// возвращаем обычное сообщение в формате JSON
 	return c.JSON(fiber.Map{

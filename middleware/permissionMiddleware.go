@@ -3,6 +3,7 @@ package middleware
 import (
 	"errors"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/log"
 	"go-admin/database"
 	"go-admin/models"
 	"go-admin/utils"
@@ -10,9 +11,10 @@ import (
 )
 
 func IsAuthorized(c *fiber.Ctx, page string) error {
+	log.Info("getting cookies")
 	// берем текущие куки
 	cookie := c.Cookies("jwt")
-
+	log.Info("Parsing JWT")
 	//парсим из них токен
 	Id, err := utils.ParseJwt(cookie)
 

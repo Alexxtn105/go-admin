@@ -18,7 +18,7 @@ func Connect() {
 
 	// подключаемся к БД (имя_пользователя:пароль@/адрес сервера (для localhost пусто)
 	//database, err := gorm.Open(mysql.Open("root:Sulubun205!@/go-admin"), &gorm.Config{})
-	database, err := gorm.Open(sqlite.Open("storage/data.db"), &gorm.Config{})
+	database, err := gorm.Open(sqlite.Open("storage/database.db"), &gorm.Config{})
 	if err != nil {
 
 		panic("Could not connect to the database")
